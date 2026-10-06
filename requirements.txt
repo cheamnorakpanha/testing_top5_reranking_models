@@ -1,0 +1,7 @@
+numpy
+psutil
+requests
+torch
+transformers<5
+sentence-transformers
+einops

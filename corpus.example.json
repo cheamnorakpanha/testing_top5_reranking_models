@@ -1,0 +1,8 @@
+[
+  {"chunk_id": "c001", "doc_id": "attendance-policy", "section": "2.1 Late arrival",
+   "text": "A student arriving more than 15 minutes after class starts is marked late. Three late marks count as one absence."},
+  {"chunk_id": "c002", "doc_id": "attendance-policy", "section": "2.2 Absence",
+   "text": "A student with more than 5 unexcused absences in a term is flagged as at-risk and reviewed by the program coordinator."},
+  {"chunk_id": "c003", "doc_id": "allowance-guide", "section": "1.1 Monthly allowance",
+   "text": "Monthly allowance is paid on the 5th and is reduced by a fixed amount for every unexcused absence."}
+]

@@ -1,0 +1,8 @@
+[
+  {"id": "q01", "type": "exact", "question": "How many unexcused absences make a student at-risk?",
+   "relevant_chunk_ids": ["c002"], "expected_doc": "attendance-policy", "expected_section": "2.2 Absence"},
+  {"id": "q02", "type": "paraphrased", "question": "What happens to my pay if I skip class without permission?",
+   "relevant_chunk_ids": ["c003"], "expected_doc": "allowance-guide", "expected_section": "1.1 Monthly allowance"},
+  {"id": "q03", "type": "no-answer", "question": "What is the dress code for graduation?",
+   "relevant_chunk_ids": []}
+]
