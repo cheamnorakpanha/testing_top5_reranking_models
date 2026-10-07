@@ -143,7 +143,8 @@ class Embedder:
 
 def embed_corpus(embedder: Embedder, texts: list[str], cache_dir: Path):
     """Embed the corpus (cached on disk). Returns (matrix, chunks_per_sec or None)."""
-    key = hashlib.md5((embedder.model_name + "\n".join(texts)).encode()).hexdigest()[:12]
+    key = hashlib.md5((embedder.model_name + "\n".join(texts)
+                       ).encode()).hexdigest()[:12]
     path = cache_dir / f"emb_{key}.npy"
     if path.exists():
         print(f"[embed] using cache {path}")
@@ -195,7 +196,8 @@ class Qwen3Reranker:
         self.max_length = max_length
         self.tok = AutoTokenizer.from_pretrained(model, padding_side="left")
         dtype = torch.float16 if device.startswith("cuda") else torch.float32
-        self.m = AutoModelForCausalLM.from_pretrained(model, torch_dtype=dtype).to(device).eval()
+        self.m = AutoModelForCausalLM.from_pretrained(
+            model, torch_dtype=dtype).to(device).eval()
         self.yes = self.tok.convert_tokens_to_ids("yes")
         self.no = self.tok.convert_tokens_to_ids("no")
 
@@ -211,7 +213,8 @@ class Qwen3Reranker:
                            max_length=self.max_length, return_tensors="pt").to(self.device)
             with torch.no_grad():
                 logits = self.m(**enc).logits[:, -1, :]
-            pair = torch.stack([logits[:, self.no], logits[:, self.yes]], dim=1).float()
+            pair = torch.stack(
+                [logits[:, self.no], logits[:, self.yes]], dim=1).float()
             out += torch.log_softmax(pair, dim=1)[:, 1].exp().tolist()
         return out
 
@@ -242,9 +245,11 @@ def summarize(ranks: dict[str, int | None], top1: dict[str, float], questions: l
     noans = [q for q in questions if not q["relevant_chunk_ids"]]
     res: dict = {"n_answerable": len(ans), "n_no_answer": len(noans)}
     for k in ks:
-        res[f"recall@{k}"] = mean([1.0 if (ranks[q["id"]] or 10**9) <= k else 0.0 for q in ans])
+        res[f"recall@{k}"] = mean([1.0 if (ranks[q["id"]]
+                                  or 10**9) <= k else 0.0 for q in ans])
     res[f"mrr@{final_k}"] = mean(
-        [1.0 / ranks[q["id"]] if ranks[q["id"]] and ranks[q["id"]] <= final_k else 0.0 for q in ans]
+        [1.0 / ranks[q["id"]] if ranks[q["id"]]
+            and ranks[q["id"]] <= final_k else 0.0 for q in ans]
     )
     res["top1_score_answerable"] = mean([top1[q["id"]] for q in ans])
     res["top1_score_no_answer"] = mean([top1[q["id"]] for q in noans])
@@ -287,11 +292,15 @@ def main() -> None:
     ap.add_argument("--questions", default="data/questions.example.json")
     ap.add_argument("--embedder", default="BAAI/bge-m3")
     ap.add_argument("--rerankers", nargs="*", default=list(RERANKERS))
-    ap.add_argument("--candidates", type=int, default=20, help="first-stage Top-N fed to reranker")
-    ap.add_argument("--final-k", type=int, default=5, help="chunks passed to the LLM")
-    ap.add_argument("--device", default=None, help="cuda / cpu (auto if omitted)")
+    ap.add_argument("--candidates", type=int, default=20,
+                    help="first-stage Top-N fed to reranker")
+    ap.add_argument("--final-k", type=int, default=5,
+                    help="chunks passed to the LLM")
+    ap.add_argument("--device", default=None,
+                    help="cuda / cpu (auto if omitted)")
     ap.add_argument("--out-dir", default="results")
-    ap.add_argument("--rag-url", default=None, help="OpenAI-compatible base URL, e.g. vLLM")
+    ap.add_argument("--rag-url", default=None,
+                    help="OpenAI-compatible base URL, e.g. vLLM")
     ap.add_argument("--rag-model", default=None)
     args = ap.parse_args()
 
@@ -357,7 +366,8 @@ def main() -> None:
             f, r = first[q["id"]], rerank_ms_map[q["id"]]
             latency[name][q["id"]] = {"embed_ms": f["embed_ms"], "search_ms": f["search_ms"],
                                       "rerank_ms": r, "total_ms": f["embed_ms"] + f["search_ms"] + r}
-        summary[name] = summarize(ranks[name], top1[name], questions, latency[name], args.final_k)
+        summary[name] = summarize(
+            ranks[name], top1[name], questions, latency[name], args.final_k)
 
     # ---- Pipeline A: vector only
     register(
@@ -367,7 +377,8 @@ def main() -> None:
         {q["id"]: 0.0 for q in questions},
     )
     summary[BASELINE][f"recall@{n_cand}_candidates"] = mean(
-        [1.0 if ranks[BASELINE][q["id"]] else 0.0 for q in questions if q["relevant_chunk_ids"]]
+        [1.0 if ranks[BASELINE][q["id"]]
+            else 0.0 for q in questions if q["relevant_chunk_ids"]]
     )
     resources[BASELINE] = {"embed_chunks_per_sec": chunks_per_sec}
 
@@ -382,7 +393,8 @@ def main() -> None:
         rr = load_reranker(cfg, device)
         load_s = time.perf_counter() - t0
         probe = first[questions[0]["id"]]["order"]
-        rr.score(questions[0]["question"], [text_by_id[c] for c in probe])  # warmup
+        rr.score(questions[0]["question"], [text_by_id[c]
+                 for c in probe])  # warmup
 
         order_map, top1_map, ms_map = {}, {}, {}
         for q in questions:
@@ -456,8 +468,10 @@ def main() -> None:
         "| Pipeline | answerable | no-answer |", "|---|---|---|",
     ]
     for name, s in summary.items():
-        lines.append(f"| {name} | {s['top1_score_answerable']:.3f} | {s['top1_score_no_answer']:.3f} |")
-    lines.append("\nA clear gap suggests the score can be thresholded to detect 'not found'.")
+        lines.append(
+            f"| {name} | {s['top1_score_answerable']:.3f} | {s['top1_score_no_answer']:.3f} |")
+    lines.append(
+        "\nA clear gap suggests the score can be thresholded to detect 'not found'.")
     (out / "results.md").write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))
     print(f"\n[done] wrote results to {out}/")

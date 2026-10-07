@@ -1,0 +1,156 @@
+# ============================================================================
+# SENSITIVE DATA: never commit (student records, questions, benchmark outputs)
+# ============================================================================
+real-data/
+/docs/
+/data/
+/fake/
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.tsv
+~$*
+.~lock.*#
+
+# Benchmark outputs: per-query files contain chunk IDs derived from real file names.
+# Aggregate files are safe to keep, so they are re-included below.
+/results/*
+!/results/results.md
+!/results/summary.csv
+
+# Vector store files
+chroma/
+chroma_db/
+.chroma/
+*.sqlite3
+*.sqlite3-journal
+
+# Real question / corpus exports (the *.example.json templates stay tracked)
+/questions.json
+/corpus.json
+/queries.json
+/queries.*
+!/queries.example.*
+
+# ============================================================================
+# Secrets, Environment Variables, and Configurations
+# ============================================================================
+.env
+.env.*
+!.env.example
+.flaskenv
+*.secret
+*.pem
+*.key
+secrets/
+credentials*.json
+local_settings.py
+
+# ============================================================================
+# Python Core & Byte-compiled files
+# ============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ============================================================================
+# Virtual Environments (DO NOT COMMIT!)
+# ============================================================================
+.venv/
+venv/
+ENV/
+env/
+python-local-env/
+
+# ============================================================================
+# Model weights and ML caches (multi-GB downloads)
+# ============================================================================
+.cache/
+huggingface/
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.gguf
+
+# ============================================================================
+# Distribution, Packaging, and Builds
+# ============================================================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.spec
+
+# ============================================================================
+# Testing, Logs, Linters and Coverage
+# ============================================================================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+.dmypy.json
+*.log
+pip-log.txt
+
+# ============================================================================
+# IDEs, Editors, and Tools
+# ============================================================================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.spyderproject
+.ropeproject
+
+# ============================================================================
+# OS junk (Windows / macOS / WSL)
+# ============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*:Zone.Identifier
+
+# ============================================================================
+# Notebooks and Frameworks
+# ============================================================================
+.ipynb_checkpoints
+instance/
+.webassets-cache
+.scrapy
+docs/_build/
+db.sqlite3
+db.sqlite3-journal

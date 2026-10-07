@@ -1,0 +1,52 @@
+# Reranker benchmark config. Edit the paths and column names to match YOUR data.
+
+corpus:
+  dir: ./real-data/docs # folder containing the Excel files (searched recursively)
+  globs: ["**/*.xlsx", "**/*.xls"]
+  header_row: 0 # 0 = first row holds column headers; change if sheets have title rows
+  max_chunks: null # set a number to sample for a quick dry run
+
+queries:
+  file: ./fake/queries.xlsx # your LLM-generated benchmark questions (.xlsx or .csv)
+  query_col: query # column holding the question text
+  label_col: relevant # column holding the correct chunk(s)
+  label_type:
+    id # id = chunk IDs (see chunk id format in README)
+    # text = the label is the text of the correct row/chunk
+  label_sep: ";" # separator when a query has several correct chunks
+
+embedding:
+  model: BAAI/bge-m3
+  batch_size: 16
+
+retrieval:
+  candidates: 20 # Vector Search -> Top N fed to the reranker
+  final_k: 5 # final cut-off for every pipeline
+
+device: auto # auto | cuda | cpu
+output_dir: ./results
+warmup_queries: 3
+
+# external: true means the data leaves your machine. Skipped unless you pass --allow-external.
+rerankers:
+  - name: bge-reranker-v2-m3
+    kind: cross_encoder
+    model_id: BAAI/bge-reranker-v2-m3
+    external: false
+  - name: qwen3-reranker-0.6b
+    kind: cross_encoder
+    model_id: tomaarsen/Qwen3-Reranker-0.6B-seq-cls
+    external: false
+  - name: mxbai-rerank-base-v2
+    kind: mxbai
+    model_id: mixedbread-ai/mxbai-rerank-base-v2
+    external: false
+  - name: jina-reranker-v3
+    kind: jina
+    model_id: jinaai/jina-reranker-v3
+    external: false
+  - name: cohere-rerank-v4-fast
+    kind: cohere
+    model_id: rerank-v4.0-fast # verify the exact model string in Cohere docs
+    external: true
+    sleep_s: 6 # trial keys are rate limited; lower this on a production key

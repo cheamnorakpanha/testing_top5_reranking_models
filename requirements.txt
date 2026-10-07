@@ -1,7 +1,11 @@
+pandas
+openpyxl
+xlrd          # needed for old .xls files
+pyyaml
 numpy
-psutil
-requests
+chromadb
 torch
-transformers<5
-sentence-transformers
-einops
+sentence-transformers>=3.4
+transformers
+mxbai-rerank  # only for mxbai-rerank-v2
+cohere        # only for Cohere (external API)
