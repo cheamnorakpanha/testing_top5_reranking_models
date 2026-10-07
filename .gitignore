@@ -2,6 +2,7 @@
 # SENSITIVE DATA: never commit (student records, questions, benchmark outputs)
 # ============================================================================
 real-data/
+real_data/
 /docs/
 /data/
 /fake/
@@ -13,11 +14,14 @@ real-data/
 ~$*
 .~lock.*#
 
-# Benchmark outputs: per-query files contain chunk IDs derived from real file names.
-# Aggregate files are safe to keep, so they are re-included below.
-/results/*
-!/results/results.md
-!/results/summary.csv
+# Benchmark outputs (results/, results_synthetic/, results_real/, ...).
+# Per-query files contain chunk IDs derived from real documents, so everything is ignored
+# except the aggregate files, which are re-included below.
+/results*/*
+!/results*/results.md
+!/results*/summary.csv
+per_query_*.jsonl
+rag_quality*
 
 # Vector store files
 chroma/
@@ -32,6 +36,9 @@ chroma_db/
 /queries.json
 /queries.*
 !/queries.example.*
+/corpus.*
+!/corpus.example.*
+*.jsonl
 
 # ============================================================================
 # Secrets, Environment Variables, and Configurations

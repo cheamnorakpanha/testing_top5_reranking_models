@@ -1,0 +1,62 @@
+# REAL data (sensitive): runs fully local. Do not use --allow-external with this config.
+# Copy to config.yaml.
+# The corpus and questions files can be .json, .jsonl, .xlsx, .xls or .csv.
+# In Excel/CSV, put several correct chunk IDs in one cell separated by ; (e.g. c002;c005).
+
+corpus:
+  file: ../testing-top5-embedding-models/synthetic/corpus.jsonl # read in place, no copy needed
+  id_field: chunk_id
+  text_field: text
+  prefix_sep: " - " # matches benchmark.py: "{doc_title} - {section}\n{text}"
+  prefix_fields:
+    [doc_title, section] # prepended to the text before embedding; use [] for text only.
+    # Set this to whatever your embedding benchmark embedded, so the
+    # baseline matches results_real/bge-m3.json
+  max_chunks: null
+
+queries:
+  file: ../testing-top5-embedding-models/synthetic/queries.jsonl
+  query_col: query
+  label_col: expected_chunks
+  type_col: type # exact / paraphrased / short / long / technical / similar-document / no-answer
+  label_type: chunk_ids # an empty expected_chunks list = no-answer question (excluded from metrics)
+
+embedding:
+  model: BAAI/bge-m3
+  batch_size: 16
+
+retrieval:
+  candidates: 20 # Vector Search -> Top 20 fed to the reranker
+  final_k: 5
+
+device: auto
+output_dir: ./results_synthetic
+warmup_queries: 3
+
+decision:
+  min_mrr_gain: 0.03 # a reranker must add at least this much MRR@5 to be "worth it"
+  max_added_p95_ms: 500 # and add no more than this much p95 latency
+
+# external: true means the data leaves your machine. Skipped unless you pass --allow-external.
+rerankers:
+  - name: bge-reranker-v2-m3
+    kind: cross_encoder
+    model_id: BAAI/bge-reranker-v2-m3
+    external: false
+  - name: qwen3-reranker-0.6b
+    kind: qwen3
+    model_id: Qwen/Qwen3-Reranker-0.6B
+    external: false
+  - name: mxbai-rerank-base-v2
+    kind: mxbai
+    model_id: mixedbread-ai/mxbai-rerank-base-v2
+    external: false
+  - name: jina-reranker-v3
+    kind: jina
+    model_id: jinaai/jina-reranker-v3
+    external: false
+  - name: cohere-rerank-v4-fast
+    kind: cohere
+    model_id: rerank-v4.0-fast # verify the exact model string in Cohere docs
+    external: true
+    sleep_s: 6

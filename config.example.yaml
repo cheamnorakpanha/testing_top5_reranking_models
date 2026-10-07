@@ -1,0 +1,62 @@
+corpus:
+  file: ../testing-top5-embedding-models/real_data/real/corpus.jsonl
+  id_field: chunk_id
+  text_field: text
+  prefix_fields: [doc_title, section] # change to [] if the grep shows text-only embedding
+  max_chunks: null
+
+queries:
+  file: ../testing-top5-embedding-models/real_data/real/queries.jsonl
+  query_col: query
+  label_col: expected_chunks
+  type_col: type
+  label_type: chunk_ids
+
+embedding:
+  model: BAAI/bge-m3
+  batch_size: 16
+
+retrieval:
+  candidates: 20
+  final_k: 5
+
+device: auto
+output_dir: ./results
+warmup_queries: 3
+
+decision:
+  min_mrr_gain: 0.03
+  max_added_p95_ms: 500
+
+rerankers:
+  - {
+      name: bge-reranker-v2-m3,
+      kind: cross_encoder,
+      model_id: BAAI/bge-reranker-v2-m3,
+      external: false,
+    }
+  - {
+      name: qwen3-reranker-0.6b,
+      kind: cross_encoder,
+      model_id: tomaarsen/Qwen3-Reranker-0.6B-seq-cls,
+      external: false,
+    }
+  - {
+      name: mxbai-rerank-base-v2,
+      kind: mxbai,
+      model_id: mixedbread-ai/mxbai-rerank-base-v2,
+      external: false,
+    }
+  - {
+      name: jina-reranker-v3,
+      kind: jina,
+      model_id: jinaai/jina-reranker-v3,
+      external: false,
+    }
+  - {
+      name: cohere-rerank-v4-fast,
+      kind: cohere,
+      model_id: rerank-v4.0-fast,
+      external: true,
+      sleep_s: 6,
+    }
