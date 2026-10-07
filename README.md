@@ -7,34 +7,47 @@ Does reranking improve retrieval enough to justify the extra compute?
 
 Result and decision: see [`reranker-benchmark.md`](reranker-benchmark.md).
 
-## Files
+## Layout
 
-| File                                            | Purpose                                                                                                               |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `rerank_bench.py`                               | The benchmark: embeds the corpus (BGE-M3), stores it in ChromaDB, runs vector Top 5 and each reranker, writes metrics |
-| `make_report.py`                                | Rebuilds `results/results.md` from `summary.json` and `meta.json`                                                     |
-| `make_fake_data.py`                             | Makes fake Excel data for a `--mock` smoke test (no GPU or models needed)                                             |
-| `config.real.yaml`                              | Real data (sensitive). Runs fully local                                                                               |
-| `config.synthetic.yaml`                         | Synthetic data, safe to share                                                                                         |
-| `config.example.yaml`                           | Generic template                                                                                                      |
-| `corpus.example.json`, `questions.example.json` | Formats of the input files                                                                                            |
-| `old/`                                          | Earlier template script, kept for history                                                                             |
+```
+.
+├── README.md
+├── reranker-benchmark.md        final report and decision
+├── requirements.txt
+├── configs/
+│   ├── config.real.yaml         real data (sensitive), runs fully local
+│   ├── config.synthetic.yaml    synthetic data, safe to share
+│   └── config.example.yaml      generic template
+├── examples/
+│   ├── corpus.example.json      corpus format
+│   └── questions.example.json   questions format
+├── src/
+│   ├── rerank_bench.py          the benchmark (BGE-M3 + ChromaDB, vector Top 5 vs Top 20 -> rerank -> Top 5)
+│   ├── make_report.py           rebuilds results/results.md from summary.json and meta.json
+│   └── make_fake_data.py        fake Excel data for a --mock smoke test
+├── results/                     real-data results (only results.md and summary.csv are committed)
+├── results_synthetic/           synthetic results (same rule)
+├── old/                         earlier template script, kept for history
+└── real-data/                   sensitive input (git-ignored)
+```
 
 ## Run
+
+Run everything from the project root.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 # real data (local only)
-python rerank_bench.py --config config.real.yaml --models bge-reranker-v2-m3,jina-reranker-v3,qwen3-reranker-0.6b
-python make_report.py        # rebuilds results/results.md
+python src/rerank_bench.py --config configs/config.real.yaml --models bge-reranker-v2-m3,jina-reranker-v3,qwen3-reranker-0.6b
+python src/make_report.py --config configs/config.real.yaml    # rebuilds results/results.md
 
 # synthetic data
-python rerank_bench.py --config config.synthetic.yaml --models bge-reranker-v2-m3,jina-reranker-v3,qwen3-reranker-0.6b
+python src/rerank_bench.py --config configs/config.synthetic.yaml --models bge-reranker-v2-m3,jina-reranker-v3,qwen3-reranker-0.6b
 
 # wiring test without models
-python make_fake_data.py && python rerank_bench.py --config fake/config.yaml --mock
+python src/make_fake_data.py && python src/rerank_bench.py --config fake/config.yaml --mock
 ```
 
 Input files (corpus and questions) can be JSON, JSONL, Excel or CSV. Questions with an empty `expected_chunks` list are
